@@ -1,0 +1,27 @@
+{% extends 'urlshorter/base.html' %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1>Shortened URLs</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Short URL</th>
+                <th>Original URL</th>
+                <th>Created</th>
+                <th>Times Followed</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for url in short_urls %}
+            <tr>
+                <td><a href="/{{ url.short_url }}" target="_blank">{{ url.short_url }}</a></td>
+                <td>{{ url.long_url }}</td>
+                <td>{{ url.created }}</td>
+                <td>{{ url.times_followed }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock body %}

@@ -1,14 +1,15 @@
 from django.urls import path, include
-from .views import home_view, redirect_url_view
+from . import views
 from .api import api
- 
-appname = "shorter"
- 
+
+app_name = "shorter"
+
 urlpatterns = [
-    # Home view
-    path("", home_view, name="home"),
-    path('<str:shorted_part>', redirect_url_view, name='redirect'),
-    path('api/', api.urls), 
-    path('silk/', include('silk.urls', namespace='silk')),
+    path('', views.home_view, name='home'),
+    path('api/shorten/', views.api_shorten_url, name='api_shorten_url'),
+    path('silk/', include('silk.urls',namespace='silk')),
+    path('short-urls/', views.short_url_list_view, name='short_url_list'),
+    path('<str:shorted_part>/', views.redirect_url_view, name='redirect_url'),
+    
 ]
 

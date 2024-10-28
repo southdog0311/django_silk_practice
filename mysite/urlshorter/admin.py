@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import Shorter
 
-# Register your models here.
+@admin.register(Shorter)
+class ShorterAdmin(admin.ModelAdmin):
+    list_display = ('long_url', 'short_url', 'created', 'times_followed')
