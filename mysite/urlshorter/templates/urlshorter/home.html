@@ -3,22 +3,22 @@
 {% block title %}短網址縮短應用程式{% endblock title %}
 
 {% block body %}
-<div class="card mt-5">    
-    <div class="card-header text-center py-3">      
-        <h1>URL Shortener Application <i class="fas fa-link px-2"></i></h1>    
-    </div>    
-    <div class="px-3 py-4">      
-        <form id="shorten-url-form">        
-            <div class="row g-1">          
+<div class="card mt-5">
+    <div class="card-header text-center py-3">
+        <h1>URL Shortener Application <i class="fas fa-link px-2"></i></h1>
+    </div>
+    <div class="px-3 py-4">
+        <form id="shorten-url-form">
+            <div class="row g-1">
                 <div class="col-10">
                     <input type="url" class="form-control" id="longUrl" placeholder="Enter long URL" required>
-                </div>          
-                <div class="col-2">            
-                    <button type="button" class="btn btn-success btn-lg w-100" id="submitBtn">Shorten</button>          
-                </div>        
-            </div>      
-        </form>    
-    </div>  
+                </div>
+                <div class="col-2">
+                    <button type="button" class="btn btn-success btn-lg w-100" id="submitBtn">Shorten</button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
 <div class="alert alert-danger mt-4 d-none" id="errorAlert" role="alert">
@@ -30,6 +30,10 @@
     <p>Copy your URL:</p>
     <p><a href="#" id="shortenedUrl" target="_blank"></a></p>
     <p><span class="text-danger">Original URL:</span> <span id="originalUrl"></span></p>
+</div>
+
+<div class="mt-5 text-center">
+    <a href="{% url 'shorter:short_url_list' %}" class="btn btn-primary">View Shortened URLs</a>
 </div>
 
 <script>
@@ -55,7 +59,6 @@
             });
 
             const data = await response.json();
-
             if (response.ok) {
                 // Show the result
                 shortenedUrl.href = data.new_url;
