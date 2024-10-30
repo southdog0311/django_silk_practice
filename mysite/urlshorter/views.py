@@ -16,7 +16,7 @@ def redirect_url_view(request, shorted_part):
         shorter.save()
         return HttpResponseRedirect(shorter.long_url)
     except Shorter.DoesNotExist:
-        raise Http404('Sorry, this link is broken :(')
+        raise Http404('Sorry, this link is broken')
 
 def api_shorten_url(request):
     if request.method == 'POST':

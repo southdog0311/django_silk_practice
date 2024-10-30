@@ -24,5 +24,13 @@ def get_long_url(request, shorted_part: str):
 
 @api.get("/shortened/")
 def get_shortened_urls(request):
-    shorteners = Shorter.objects.all().values("long_url", "short_url")
+    shorteners = Shorter.objects.all().values("long_url", "short_url", "created", "times_followed")
     return {"shortened_urls": list(shorteners)}
+
+@api.get("/shorten/{shorted_part}")
+def get_long_url(request, shorted_part: str):
+    try:
+        shorter = Shorter.objects.get(short_url=shorted_part)
+        return {"long_url": shorter.long_url}
+    except Shorter.DoesNotExist:
+        return {"error": "Short URL does not exist"}, 404

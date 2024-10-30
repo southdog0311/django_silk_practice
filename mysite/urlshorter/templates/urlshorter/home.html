@@ -2,39 +2,78 @@
 
 {% block title %}短網址縮短應用程式{% endblock title %}
 
+{% block head %}
+<!-- 導入 Bootstrap CSS 和 Font Awesome -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<style>
+    .no-background {
+        background-color: transparent !important; /* 去除背景色 */
+        text-align: center; /* 置中 */
+    }
+</style>
+{% endblock head %}
+
 {% block body %}
-<div class="card mt-5">
-    <div class="card-header text-center py-3">
-        <h1>URL Shortener Application <i class="fas fa-link px-2"></i></h1>
+<div class="container mt-5">
+    <div class="d-flex justify-content-end mb-4">
+        <a href="http://127.0.0.1:8000/short-urls/" class="btn btn-secondary btn-lg">View Short URLs</a>
     </div>
-    <div class="px-3 py-4">
-        <form id="shorten-url-form">
-            <div class="row g-1">
-                <div class="col-10">
-                    <input type="url" class="form-control" id="longUrl" placeholder="Enter long URL" required>
+    <div class="card shadow rounded-4">
+        <div class="card-header bg-light text-center py-4">
+            <h1>URL Shortener Application <i class="fas fa-link px-2"></i></h1>
+        </div>
+        <div class="px-4 py-5">
+            <form id="shorten-url-form">
+                <div class="row g-2">
+                    <div class="col-10">
+                        <input type="url" class="form-control form-control-lg rounded-3" id="longUrl" placeholder="Enter long URL" required>
+                    </div>
+                    <div class="col-2">
+                        <button type="button" class="btn btn-success btn-lg w-100 rounded-3" id="submitBtn">Shorten</button>
+                    </div>
                 </div>
-                <div class="col-2">
-                    <button type="button" class="btn btn-success btn-lg w-100" id="submitBtn">Shorten</button>
-                </div>
+            </form>
+
+            <div class="alert alert-danger mt-4 d-none" id="errorAlert" role="alert">
+                <p>發生錯誤，請重試。</p>
             </div>
-        </form>
+
+            <div class="text-center mt-4 d-none" id="resultSection">
+                <h2 class="text-danger">Shortened URL</h2>
+                <p>Copy your URL:</p>
+                <p><a href="#" id="shortenedUrl" target="_blank"></a></p>
+                <p class="no-background"><span class="text-danger">Original URL:</span> <span id="originalUrl"></span></p> <!-- 修改這一行 -->
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow rounded-4 mt-5">
+        <div class="px-4 py-5">
+            <form id="lookup-url-form">
+                <div class="row g-2">
+                    <div class="col-10">
+                        <input type="text" class="form-control form-control-lg rounded-3" id="shortUrlInput" placeholder="Enter short URL to get original URL">
+                    </div>
+                    <div class="col-2">
+                        <button type="button" class="btn btn-primary btn-lg w-100 rounded-3" id="lookupBtn">Lookup</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="alert alert-danger mt-3 d-none" id="lookupError" role="alert">
+                <p>Short URL not found.</p>
+            </div>
+            <div class="alert alert-success mt-3 d-none" id="lookupResult" role="alert" style="background-color: transparent; border: none; text-align: center;">
+                <p style="margin: 0;">Original URL: <a href="#" id="lookupOriginalUrl" target="_blank"></a></p>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="alert alert-danger mt-4 d-none" id="errorAlert" role="alert">
-    <p>發生錯誤，請重試。</p>
-</div>
-
-<div class="mx-auto text-center mt-5 d-none" id="resultSection">
-    <h2 class="text-danger">Shortened URL</h2>
-    <p>Copy your URL:</p>
-    <p><a href="#" id="shortenedUrl" target="_blank"></a></p>
-    <p><span class="text-danger">Original URL:</span> <span id="originalUrl"></span></p>
-</div>
-
-<div class="mt-5 text-center">
-    <a href="{% url 'shorter:short_url_list' %}" class="btn btn-primary">View Shortened URLs</a>
-</div>
+<!-- Bootstrap 和 JavaScript -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
     document.getElementById('submitBtn').addEventListener('click', async function() {
@@ -44,7 +83,6 @@
         const shortenedUrl = document.getElementById('shortenedUrl');
         const originalUrl = document.getElementById('originalUrl');
 
-        // Reset visibility
         errorAlert.classList.add('d-none');
         resultSection.classList.add('d-none');
 
@@ -53,26 +91,51 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'  // 確保 CSRF token 正確
+                    'X-CSRFToken': '{{ csrf_token }}'
                 },
-                body: JSON.stringify({ long_url: longUrl })  // 使用 long_url 作為鍵
+                body: JSON.stringify({ long_url: longUrl })
             });
 
             const data = await response.json();
             if (response.ok) {
-                // Show the result
                 shortenedUrl.href = data.new_url;
                 shortenedUrl.textContent = data.new_url;
                 originalUrl.textContent = data.long_url;
                 resultSection.classList.remove('d-none');
+                document.getElementById('longUrl').value = '';
             } else {
-                // Show the error
                 errorAlert.classList.remove('d-none');
-                console.error(data.errors);  // Log errors to console for debugging
+                console.error(data.errors);
             }
         } catch (error) {
-            // Show the error
             errorAlert.classList.remove('d-none');
+            console.error('Error:', error);
+        }
+    });
+
+    document.getElementById('lookupBtn').addEventListener('click', async function() {
+        const shortUrlPart = document.getElementById('shortUrlInput').value;
+        const lookupError = document.getElementById('lookupError');
+        const lookupResult = document.getElementById('lookupResult');
+        const lookupOriginalUrl = document.getElementById('lookupOriginalUrl');
+
+        lookupError.classList.add('d-none');
+        lookupResult.classList.add('d-none');
+
+        try {
+            const response = await fetch(`/api/shorten/${shortUrlPart}`);
+            const data = await response.json();
+            if (response.ok) {
+                lookupOriginalUrl.href = data.long_url;
+                lookupOriginalUrl.textContent = data.long_url;
+                lookupResult.classList.remove('d-none');
+                document.getElementById('shortUrlInput').value = '';
+            } else {
+                lookupError.classList.remove('d-none');
+                console.error(data.error);
+            }
+        } catch (error) {
+            lookupError.classList.remove('d-none');
             console.error('Error:', error);
         }
     });

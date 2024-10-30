@@ -12,16 +12,48 @@
                 <th>Times Followed</th>
             </tr>
         </thead>
-        <tbody>
-            {% for url in short_urls %}
-            <tr>
-                <td><a href="/{{ url.short_url }}" target="_blank">{{ url.short_url }}</a></td>
-                <td>{{ url.long_url }}</td>
-                <td>{{ url.created }}</td>
-                <td>{{ url.times_followed }}</td>
-            </tr>
-            {% endfor %}
+        <tbody id="urlTableBody">
+            <!-- Data will be inserted here by JavaScript -->
         </tbody>
     </table>
 </div>
+
+<script>
+    function formatDate(dateStr) {
+        const date = new Date(dateStr);
+        return date.toLocaleString('zh-TW', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    }
+
+    async function fetchShortenedUrls() {
+        try {
+            const response = await fetch('/api/shortened/');
+            const data = await response.json();
+
+            const tableBody = document.getElementById('urlTableBody');
+            tableBody.innerHTML = '';
+
+            data.shortened_urls.forEach(url => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><a href="/${url.short_url}" target="_blank">${url.short_url}</a></td>
+                    <td>${url.long_url}</td>
+                    <td>${formatDate(url.created)}</td>
+                    <td>${url.times_followed}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error fetching shortened URLs:', error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchShortenedUrls);
+</script>
 {% endblock body %}
